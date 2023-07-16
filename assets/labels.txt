@@ -1,0 +1,9 @@
+0 Eczema
+1 Melanocytic_Nevi
+2 BasalCellCarcinoma
+3 Melanoma
+4 Seborrheic_Keratoses
+5 Tinea_Rinworm
+6 Psoriasis
+7 Chickenpox
+8 WatsMolluscum
