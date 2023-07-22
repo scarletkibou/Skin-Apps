@@ -18,13 +18,12 @@ class _dataPage extends State<dataPage> {
   void initState() {
     super.initState();
     var firebase = FirebaseFirestore.instance;
-    imageStream = firebase.collection("Image_Slider").snapshots();
+    imageStream = firebase.collection("Carousel").snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amberAccent,
       body: Column(
         children: [
           SizedBox(
@@ -65,10 +64,6 @@ class _dataPage extends State<dataPage> {
           const SizedBox(
             height: 20,
           ),
-          Text(
-            ' Current Slide Index $currentSlideIndex',
-            style: const TextStyle(fontSize: 20),
-          )
         ],
       ),
     );
