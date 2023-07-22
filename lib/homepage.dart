@@ -1,7 +1,7 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'CameraPage.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'CameraPage.dart';
+import 'dataPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,11 +11,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    // Add the widgets for your different pages here
+    // For example:
+    dataPage(),
+    CameraPage(),
+    Container(
+      color: Colors.white,
+      child: Center(
+        child: Text('Settings Page'),
+      ),
+    ),
+  ];
+
+  void _onTabChange(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _pages[_selectedIndex],
       bottomNavigationBar: GNav(
         gap: 8,
+        activeColor: Colors.black,
+        color: Colors.grey[300],
+        backgroundColor: Colors.green,
         tabs: const [
           GButton(
             icon: Icons.home,
@@ -30,16 +55,8 @@ class _HomePageState extends State<HomePage> {
             text: 'Settings',
           ),
         ],
-        selectedIndex: 0,
-        onTabChange: (index) {
-          if (index == 1) {
-            // Navigate to the CameraPage when the second button is pressed.
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CameraPage()),
-            );
-          }
-        },
+        selectedIndex: _selectedIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }

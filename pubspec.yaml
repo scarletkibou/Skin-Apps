@@ -45,6 +45,10 @@ dependencies:
   google_nav_bar: ^5.0.6
   image_picker: ^0.8.9
   http: ^1.1.0
+  dio: ^5.2.1+1
+  cloud_functions: ^4.3.4
+  carousel_slider: ^4.2.1
+  firebase_storage: ^11.2.5
 
 dev_dependencies:
   flutter_test:
