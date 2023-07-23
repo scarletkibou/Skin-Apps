@@ -49,6 +49,9 @@ dependencies:
   cloud_functions: ^4.3.4
   carousel_slider: ^4.2.1
   firebase_storage: ^11.2.5
+  flutter_native_splash: ^2.3.1
+  flutter_spinkit: ^5.2.0
+
 
 dev_dependencies:
   flutter_test:
@@ -67,8 +70,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/labels.txt
-    - assets/model_unquant.tflite
+    - assets/logo.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'dataPage.dart';
+import 'homepage.dart';
 
 class CameraPage extends StatefulWidget {
   @override
@@ -12,6 +15,9 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   File? _pickedImage;
   String _predictionResult = "";
+  String _ResultName = "";
+  bool _isPredicting = false;
+  bool _showGoToAnotherPageButton = false; // New state variable
 
   final String cloudFunctionUrl =
       'https://us-central1-skin-apps.cloudfunctions.net/predict_x';
@@ -33,13 +39,69 @@ class _CameraPageState extends State<CameraPage> {
       File imageFile = File(pickedFile.path);
       setState(() {
         _pickedImage = imageFile;
+        _isPredicting = true;
       });
       Map<String, dynamic> prediction = await makePrediction(imageFile);
       print(prediction);
       setState(() {
         _predictionResult =
-            "Prediction: ${prediction['class']}, Confidence: ${prediction['confidence']}%";
+            "${prediction['class']},${prediction['confidence']}";
+        _isPredicting = false;
       });
+    }
+  }
+
+  Widget _buildPredictionResult() {
+    if (_predictionResult.isEmpty) {
+      return Container();
+    }
+    List<String> predictionList = _predictionResult.split(',');
+    String prediction = predictionList[0].trim();
+    String confidence = predictionList[1].trim();
+    _ResultName = prediction;
+    int confidenceCheck = (double.parse(confidence)).round();
+    if (confidenceCheck > 50) {
+      _showGoToAnotherPageButton = true;
+      return RichText(
+        text: TextSpan(
+          style: TextStyle(fontSize: 20, color: Colors.black),
+          children: [
+            TextSpan(
+              text: 'Prediction: ',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+            ),
+            TextSpan(
+              text: prediction,
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            TextSpan(
+              text: ',    Confidence: ',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+            ),
+            TextSpan(
+              text: confidence + "%",
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      );
+    } else {
+      _showGoToAnotherPageButton = false;
+      return RichText(
+        text: const TextSpan(
+          style: TextStyle(fontSize: 20, color: Colors.black),
+          children: [
+            TextSpan(
+              text:
+                  'Confidence is lower than a half, make sure you input the right picture or follow the right instruction',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      );
     }
   }
 
@@ -48,43 +110,72 @@ class _CameraPageState extends State<CameraPage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _pickedImage != null
-                ? Image.file(
-                    _pickedImage!,
-                    height: 200,
-                    width: 200,
-                  )
-                : SizedBox.shrink(),
+            Container(
+              decoration: BoxDecoration(
+                border:
+                    Border.all(color: Color.fromARGB(255, 3, 4, 4), width: 0.5),
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: _pickedImage != null
+                  ? Image.file(
+                      _pickedImage!,
+                      height: 200,
+                      width: 200,
+                    )
+                  : const Icon(
+                      Icons.image_search,
+                      size: 200,
+                      color: Color(0xFF398378),
+                    ),
+            ),
             SizedBox(height: 20),
-            Text(_predictionResult),
+            _isPredicting
+                ? SpinKitWaveSpinner(color: Color(0xFF398378), size: 50)
+                : _buildPredictionResult(),
+            SizedBox(height: 20),
+            _showGoToAnotherPageButton // Show the button based on the state
+                ? ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => dataPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF398378),
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                    ),
+                    child: Text('See $_ResultName Details'),
+                  )
+                : Container(),
             SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                OutlinedButton(
-                  onPressed: () {
-                    _pickImage(ImageSource.gallery); // Pick from gallery
-                  },
-                  child: Text('Pick Image'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: BorderSide(
-                      color: Colors.red,
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _pickImage(ImageSource.gallery);
+                    },
+                    child: Text('Pick Image'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF398378),
+                      padding: EdgeInsets.symmetric(vertical: 20),
                     ),
                   ),
                 ),
                 SizedBox(width: 20),
-                OutlinedButton(
-                  onPressed: () {
-                    _pickImage(ImageSource.camera); // Take a photo
-                  },
-                  child: Text('Take Photo'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.green,
-                    side: BorderSide(
-                      color: Colors.green,
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _pickImage(ImageSource.camera);
+                    },
+                    child: Text('Take Photo'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF398378),
+                      padding: EdgeInsets.symmetric(vertical: 20),
                     ),
                   ),
                 ),

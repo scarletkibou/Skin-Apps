@@ -27,7 +27,7 @@ class _dataPage extends State<dataPage> {
       body: Column(
         children: [
           SizedBox(
-            height: 300,
+            height: 200,
             width: double.infinity,
             child: StreamBuilder<QuerySnapshot>(
               stream: imageStream,
