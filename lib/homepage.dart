@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+
 import 'CameraPage.dart';
 import 'dataPage.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -12,35 +14,59 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-  bool _showSplash =
-      true; // Add a boolean flag to control the splash screen visibility
+  bool _showSplash = true;
+  late PersistentTabController _controller;
 
-  final List<Widget> _pages = [
-    dataPage(),
-    CameraPage(),
-    Container(
-      color: Colors.white,
-      child: Center(
-        child: Text('Settings Page'),
+  List<Widget> _buildScreens() {
+    return [
+      dataPage(),
+      CameraPage(),
+      Container(
+        color: Colors.white,
+        child: Center(
+          child: Text('Settings Page'),
+        ),
       ),
-    ),
-  ];
+    ];
+  }
 
-  void _onTabChange(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  List<PersistentBottomNavBarItem> _navBarsItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.home),
+        title: ("Home"),
+        activeColorPrimary: Colors.black,
+        inactiveColorPrimary: Colors.grey.shade100,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(
+          Icons.camera_alt,
+          color: Colors.grey.shade100,
+        ),
+        inactiveIcon: Icon(
+          Icons.camera_alt_outlined,
+          color: Colors.grey.shade100,
+        ),
+        activeColorPrimary: Colors.red,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.settings),
+        title: ("setting"),
+        activeColorPrimary: Colors.black,
+        inactiveColorPrimary: Colors.grey.shade100,
+      ),
+    ];
   }
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 6), () {
+    Future.delayed(Duration(seconds: 3), () {
       setState(() {
         _showSplash = false;
       });
     });
+    _controller = PersistentTabController();
   }
 
   @override
@@ -48,34 +74,46 @@ class _HomePageState extends State<HomePage> {
     return _showSplash
         ? SplashScreen()
         : Scaffold(
-            body: _pages[_selectedIndex],
-            bottomNavigationBar: GNav(
-              gap: 8,
-              activeColor: Colors.black,
-              color: Colors.grey[300],
-              backgroundColor: Color(0xFF398378),
-              tabs: const [
-                GButton(
-                  icon: Icons.home,
-                  text: 'Home',
-                ),
-                GButton(
-                  icon: Icons.camera_enhance_outlined,
-                  text: 'Camera',
-                ),
-                GButton(
-                  icon: Icons.settings,
-                  text: 'Settings',
-                ),
-              ],
-              selectedIndex: _selectedIndex,
-              onTabChange: _onTabChange,
+            bottomNavigationBar: PersistentTabView(
+              context,
+              controller: _controller,
+              screens: _buildScreens(),
+              items: _navBarsItems(),
+              confineInSafeArea: true,
+              backgroundColor: Color(0xFF398378), // Default is Colors.white.
+              handleAndroidBackButtonPress: true, // Default is true.
+              resizeToAvoidBottomInset:
+                  true, // This needs to be true if you want to move up the screen when keyboard appears. Default is true.
+              stateManagement: true, // Default is true.
+              hideNavigationBarWhenKeyboardShows:
+                  true, // Recommended to set 'resizeToAvoidBottomInset' as true while using this argument. Default is true.
+              decoration: NavBarDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                colorBehindNavBar: Color.fromARGB(255, 45, 3, 3),
+              ),
+              popAllScreensOnTapOfSelectedTab: true,
+              popActionScreens: PopActionScreensType.all,
+              itemAnimationProperties: const ItemAnimationProperties(
+                // Navigation Bar's items animation properties.
+                duration: Duration(milliseconds: 200),
+                curve: Curves.ease,
+              ),
+              screenTransitionAnimation: const ScreenTransitionAnimation(
+                // Screen transition animation on change of selected tab.
+                animateTabTransition: true,
+                curve: Curves.ease,
+                duration: Duration(milliseconds: 200),
+              ),
+              navBarStyle: NavBarStyle
+                  .style15, // Choose the nav bar style with this property.
             ),
           );
   }
 }
 
 class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,11 +1,13 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-import 'dataPage.dart';
-import 'homepage.dart';
+import 'package:firebase_r/DiseasePage.dart';
+import 'package:uuid/uuid.dart';
 
 class CameraPage extends StatefulWidget {
   @override
@@ -17,10 +19,16 @@ class _CameraPageState extends State<CameraPage> {
   String _predictionResult = "";
   String _ResultName = "";
   bool _isPredicting = false;
-  bool _showGoToAnotherPageButton = false; // New state variable
+  var uuid = Uuid();
+  bool _showGoToAnotherPageButton = false;
 
   final String cloudFunctionUrl =
       'https://us-central1-skin-apps.cloudfunctions.net/predict_x';
+  @override
+  void initState() {
+    super.initState();
+    final storage = FirebaseStorage.instance;
+  }
 
   Future<Map<String, dynamic>> makePrediction(File imageFile) async {
     var request = http.MultipartRequest('POST', Uri.parse(cloudFunctionUrl));
@@ -32,6 +40,15 @@ class _CameraPageState extends State<CameraPage> {
     return jsonDecode(responseBody);
   }
 
+  Future uploadFile(File imageFile) async {
+    var name = uuid.v4();
+    final pathSaved = 'Saved_Photo/$name';
+    final storageRef = FirebaseStorage.instance.ref();
+    final file = File(imageFile.path);
+    final ref = FirebaseStorage.instance.ref().child(pathSaved);
+    ref.putFile(file);
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
@@ -41,13 +58,30 @@ class _CameraPageState extends State<CameraPage> {
         _pickedImage = imageFile;
         _isPredicting = true;
       });
+
       Map<String, dynamic> prediction = await makePrediction(imageFile);
       print(prediction);
+
       setState(() {
         _predictionResult =
             "${prediction['class']},${prediction['confidence']}";
         _isPredicting = false;
       });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ConfirmDialog(
+            onUserResponse: (bool userConfirmed) {
+              if (userConfirmed) {
+                uploadFile(_pickedImage!);
+                Navigator.pop(context, false);
+              } else {
+                Navigator.pop(context, false);
+              }
+            },
+          );
+        },
+      );
     }
   }
 
@@ -60,11 +94,11 @@ class _CameraPageState extends State<CameraPage> {
     String confidence = predictionList[1].trim();
     _ResultName = prediction;
     int confidenceCheck = (double.parse(confidence)).round();
-    if (confidenceCheck > 50) {
+    if (confidenceCheck > 45) {
       _showGoToAnotherPageButton = true;
       return RichText(
         text: TextSpan(
-          style: TextStyle(fontSize: 20, color: Colors.black),
+          style: TextStyle(fontSize: 25, color: Colors.black),
           children: [
             TextSpan(
               text: 'Prediction: ',
@@ -76,7 +110,7 @@ class _CameraPageState extends State<CameraPage> {
                   TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
             ),
             TextSpan(
-              text: ',    Confidence: ',
+              text: '\nConfidence: ',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
             ),
             TextSpan(
@@ -91,12 +125,13 @@ class _CameraPageState extends State<CameraPage> {
       _showGoToAnotherPageButton = false;
       return RichText(
         text: const TextSpan(
-          style: TextStyle(fontSize: 20, color: Colors.black),
+          style: TextStyle(fontSize: 20),
           children: [
             TextSpan(
               text:
-                  'Confidence is lower than a half, make sure you input the right picture or follow the right instruction',
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                  'Confidence is too low , make sure you input the right image or follow the right instruction',
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ],
         ),
@@ -114,8 +149,8 @@ class _CameraPageState extends State<CameraPage> {
           children: [
             Container(
               decoration: BoxDecoration(
-                border:
-                    Border.all(color: Color.fromARGB(255, 3, 4, 4), width: 0.5),
+                border: Border.all(
+                    color: Color.fromRGBO(214, 203, 193, 1), width: 0.5),
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: _pickedImage != null
@@ -127,7 +162,7 @@ class _CameraPageState extends State<CameraPage> {
                   : const Icon(
                       Icons.image_search,
                       size: 200,
-                      color: Color(0xFF398378),
+                      color: Color.fromRGBO(214, 203, 193, 1),
                     ),
             ),
             SizedBox(height: 20),
@@ -135,12 +170,15 @@ class _CameraPageState extends State<CameraPage> {
                 ? SpinKitWaveSpinner(color: Color(0xFF398378), size: 50)
                 : _buildPredictionResult(),
             SizedBox(height: 20),
-            _showGoToAnotherPageButton // Show the button based on the state
+            _showGoToAnotherPageButton
                 ? ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => dataPage()),
+                        MaterialPageRoute(
+                            builder: (context) => DiseasePage(
+                                  Disease_name: _ResultName,
+                                )),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -184,6 +222,31 @@ class _CameraPageState extends State<CameraPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ConfirmDialog extends StatelessWidget {
+  final Function(bool) onUserResponse;
+
+  ConfirmDialog({required this.onUserResponse});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('We need your Image!!'),
+      content: Text(
+          'To make our model become more accurate we need more image can we store your image for training purpose?'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => onUserResponse(true),
+          child: Text('Yes'),
+        ),
+        TextButton(
+          onPressed: () => onUserResponse(false),
+          child: Text('No'),
+        ),
+      ],
     );
   }
 }
