@@ -71,15 +71,12 @@ class _TempCamera extends State<TempCamera> {
         (_cameraController.value.isInitialized)
             ? CameraPreview(_cameraController)
             : Container(
-                color: Colors.black,
+                color: const Color(0xFF398378),
                 child: const Center(child: CircularProgressIndicator())),
         Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               height: MediaQuery.of(context).size.height * 0.20,
-              decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                  color: Colors.black),
               child:
                   Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
                 Expanded(
@@ -90,7 +87,7 @@ class _TempCamera extends State<TempCamera> {
                       _isRearCameraSelected
                           ? CupertinoIcons.switch_camera
                           : CupertinoIcons.switch_camera_solid,
-                      color: Colors.white),
+                      color: Colors.red),
                   onPressed: () {
                     setState(
                         () => _isRearCameraSelected = !_isRearCameraSelected);
@@ -103,7 +100,8 @@ class _TempCamera extends State<TempCamera> {
                   iconSize: 50,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  icon: const Icon(Icons.circle, color: Colors.white),
+                  icon: const Icon(Icons.catching_pokemon_sharp,
+                      color: Colors.red),
                 )),
                 const Spacer(),
               ]),
