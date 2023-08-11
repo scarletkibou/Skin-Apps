@@ -234,8 +234,8 @@ class ConfirmDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('We need your Image!!'),
-      content: Text(
+      title: const Text('We need your Image!!'),
+      content: const Text(
           'To make our model become more accurate we need more image can we store your image for training purpose?'),
       actions: <Widget>[
         TextButton(

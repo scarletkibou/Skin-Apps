@@ -2,8 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'ListViewBox.dart';
-import 'SearchSection.dart';
+import 'widgets/ListViewBox.dart';
+import 'widgets/SearchSection.dart';
 
 class dataPage extends StatefulWidget {
   const dataPage({super.key});

@@ -1,3 +1,4 @@
+import 'package:firebase_r/temp_camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -21,12 +22,13 @@ class _HomePageState extends State<HomePage> {
     return [
       dataPage(),
       CameraPage(),
-      Container(
-        color: Colors.white,
-        child: Center(
-          child: Text('Settings Page'),
-        ),
-      ),
+      TempCamera()
+//      Container(
+//        color: Colors.white,
+//        child: Center(
+//          child: Text('Settings Page'),
+//        ),
+//      ),
     ];
   }
 
@@ -35,8 +37,8 @@ class _HomePageState extends State<HomePage> {
       PersistentBottomNavBarItem(
         icon: Icon(Icons.home),
         title: ("Home"),
-        activeColorPrimary: Colors.black,
-        inactiveColorPrimary: Colors.grey.shade100,
+        activeColorPrimary: Color.fromARGB(255, 17, 155, 134),
+        inactiveColorPrimary: Colors.black,
       ),
       PersistentBottomNavBarItem(
         icon: Icon(
@@ -47,13 +49,13 @@ class _HomePageState extends State<HomePage> {
           Icons.camera_alt_outlined,
           color: Colors.grey.shade100,
         ),
-        activeColorPrimary: Colors.red,
+        activeColorPrimary: Color.fromARGB(255, 17, 155, 134),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.settings),
         title: ("setting"),
-        activeColorPrimary: Colors.black,
-        inactiveColorPrimary: Colors.grey.shade100,
+        activeColorPrimary: Color.fromARGB(255, 17, 155, 134),
+        inactiveColorPrimary: Colors.black,
       ),
     ];
   }
@@ -80,7 +82,7 @@ class _HomePageState extends State<HomePage> {
               screens: _buildScreens(),
               items: _navBarsItems(),
               confineInSafeArea: true,
-              backgroundColor: Color(0xFF398378), // Default is Colors.white.
+              backgroundColor: Colors.grey.shade100, // Default is Colors.white.
               handleAndroidBackButtonPress: true, // Default is true.
               resizeToAvoidBottomInset:
                   true, // This needs to be true if you want to move up the screen when keyboard appears. Default is true.

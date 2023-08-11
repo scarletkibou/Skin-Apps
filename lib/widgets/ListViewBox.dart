@@ -24,16 +24,43 @@ class ListViewBox extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: imageUrls.length,
         itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.all(6.0),
-            child: Container(
-              width: 130,
-              color: Color.fromRGBO(214, 203, 193, 1),
-              child: Image.network(
-                imageUrls[index],
-                fit: BoxFit.cover,
+          return Stack(
+            alignment: Alignment.bottomRight,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(6.0),
+                child: Container(
+                  width: 224,
+                  height: 224,
+                  child: Image.network(
+                    imageUrls[index],
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-            ),
+              Container(
+                width: 60,
+                height: 60,
+                decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(),
+                  color: Colors.transparent,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: DecoratedBox(
+                    child: Center(
+                      child: Icon(Icons.east_rounded, color: Colors.white),
+                    ),
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      color: Color(0xFF398378),
+                    ),
+                  ),
+                ),
+              )
+            ],
           );
         },
       ),

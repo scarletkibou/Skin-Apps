@@ -57,6 +57,8 @@ dependencies:
   uuid: ^3.0.7
   curved_nav_bar: ^0.0.2
   persistent_bottom_nav_bar: ^5.0.2
+  dotted_border: ^2.0.0+3
+  path_provider: ^2.0.15
 
 
 dev_dependencies:
@@ -76,7 +78,11 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/case1.jpg
+    - assets/case2.jpg
+    - assets/case3.jpg
     - assets/logo.png
+    - assets/camera_button.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
