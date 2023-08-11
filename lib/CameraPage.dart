@@ -12,12 +12,15 @@ import 'package:firebase_r/DiseasePage.dart';
 import 'package:uuid/uuid.dart';
 
 class CameraPage extends StatefulWidget {
+  const CameraPage({super.key});
+
   @override
   _CameraPageState createState() => _CameraPageState();
 }
 
 class _CameraPageState extends State<CameraPage> {
   File? _pickedImage;
+
   String _predictionResult = "";
   String _ResultName = "";
   bool _isPredicting = false;
