@@ -1,85 +1,20 @@
-import 'dart:io';
-
-import 'package:firebase_r/CameraPage.dart';
-import 'package:firebase_r/widgets/dialog.dart';
-import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:firebase_r/widgets/top_camera.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
-import 'main.dart';
+import 'package:firebase_r/preview_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class TempCamera extends StatefulWidget {
-  const TempCamera({Key? key}) : super(key: key);
+  const TempCamera({Key? key, required this.cameras}) : super(key: key);
+
+  final List<CameraDescription>? cameras;
 
   @override
-  State<TempCamera> createState() => _TempCameraState();
+  State<TempCamera> createState() => _TempCamera();
 }
 
-class _TempCameraState extends State<TempCamera> {
-  var uuid = const Uuid();
+class _TempCamera extends State<TempCamera> {
   late CameraController _cameraController;
-  late Future<void> _initializeControllerFuture;
-  XFile? image;
-
-  void showInSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  Future<void> saveImage(XFile image) async {
-    var name = uuid.v4();
-    final Directory? downloadsDir = await getDownloadsDirectory();
-    final imagePath = '${downloadsDir?.path}/$name';
-    final File savedImage = File(imagePath);
-    await savedImage.writeAsBytes(await image.readAsBytes());
-
-    print('Image saved at: $imagePath');
-  }
-
-  Future<XFile?> takePicture() async {
-    final CameraController cameraController = _cameraController;
-    if (!cameraController.value.isInitialized) {
-      showInSnackBar('Error: select a camera first.');
-      return null;
-    }
-
-    if (cameraController.value.isTakingPicture) {
-      return null;
-    }
-
-    try {
-      final XFile file = await cameraController.takePicture();
-      return file;
-    } on CameraException {
-      return null;
-    }
-  }
-
-  void onTakePictureButtonPressed() {
-    takePicture().then((XFile? file) {
-      if (mounted) {
-        setState(() {
-          image = file;
-          _cameraController.dispose();
-        });
-        if (file != null) {
-          showInSnackBar('Picture saved to ${file.path}');
-        }
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final camera = getCameras().first;
-    _cameraController = CameraController(
-      camera,
-      ResolutionPreset.medium,
-    );
-    _initializeControllerFuture = _cameraController.initialize();
-  }
+  bool _isRearCameraSelected = true;
 
   @override
   void dispose() {
@@ -88,70 +23,92 @@ class _TempCameraState extends State<TempCamera> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initCamera(widget.cameras![0]);
+  }
+
+  Future takePicture() async {
+    if (!_cameraController.value.isInitialized) {
+      return null;
+    }
+    if (_cameraController.value.isTakingPicture) {
+      return null;
+    }
+    try {
+      await _cameraController.setFlashMode(FlashMode.off);
+      XFile picture = await _cameraController.takePicture();
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PreviewPage(
+                    picture: picture,
+                  )));
+    } on CameraException catch (e) {
+      debugPrint('Error occured while taking picture: $e');
+      return null;
+    }
+  }
+
+  Future initCamera(CameraDescription cameraDescription) async {
+    _cameraController =
+        CameraController(cameraDescription, ResolutionPreset.high);
+    try {
+      await _cameraController.initialize().then((_) {
+        if (!mounted) return;
+        setState(() {});
+      });
+    } on CameraException catch (e) {
+      debugPrint("camera error $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showDialog(context: context, builder: (_) => ImageDialog());
-            });
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: CameraPreview(_cameraController),
-                ),
-                Positioned.fill(
-                  child: Container(
-                    margin:
-                        EdgeInsets.symmetric(horizontal: 100, vertical: 200),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.red,
-                        width: 6.0,
-                      ),
-                    ),
-                  ),
-                ),
-                const TopBar(),
-                Positioned(
-                  bottom: 50,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        if (_cameraController.value.isInitialized) {
-                          image = await _cameraController.takePicture();
-                          if (image != null) {
-                            await saveImage(image!); // Save the captured image
-                          }
-                        }
-                      } catch (e) {
-                        print(e); // Show error
-                      }
-                    },
-                    child: const Row(
-                      children: [
-                        Icon(
-                          Icons.catching_pokemon_sharp,
-                          color: Colors.red,
-                          size: 120,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
+        body: SafeArea(
+      child: Stack(children: [
+        (_cameraController.value.isInitialized)
+            ? CameraPreview(_cameraController)
+            : Container(
+                color: Colors.black,
+                child: const Center(child: CircularProgressIndicator())),
+        Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.20,
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  color: Colors.black),
+              child:
+                  Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                Expanded(
+                    child: IconButton(
+                  padding: EdgeInsets.zero,
+                  iconSize: 30,
+                  icon: Icon(
+                      _isRearCameraSelected
+                          ? CupertinoIcons.switch_camera
+                          : CupertinoIcons.switch_camera_solid,
+                      color: Colors.white),
+                  onPressed: () {
+                    setState(
+                        () => _isRearCameraSelected = !_isRearCameraSelected);
+                    initCamera(widget.cameras![_isRearCameraSelected ? 0 : 1]);
+                  },
+                )),
+                Expanded(
+                    child: IconButton(
+                  onPressed: takePicture,
+                  iconSize: 50,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.circle, color: Colors.white),
+                )),
+                const Spacer(),
+              ]),
+            )),
+      ]),
+    ));
   }
 }

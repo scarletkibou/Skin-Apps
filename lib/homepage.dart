@@ -22,13 +22,12 @@ class _HomePageState extends State<HomePage> {
     return [
       dataPage(),
       CameraPage(),
-      TempCamera()
-//      Container(
-//        color: Colors.white,
-//        child: Center(
-//          child: Text('Settings Page'),
-//        ),
-//      ),
+      Container(
+        color: Colors.white,
+        child: Center(
+          child: Text('Settings Page'),
+        ),
+      ),
     ];
   }
 

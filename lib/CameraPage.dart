@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_r/temp_camera.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -207,8 +209,11 @@ class _CameraPageState extends State<CameraPage> {
                 SizedBox(width: 20),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      _pickImage(ImageSource.camera);
+                    onPressed: () async {
+                      await availableCameras().then((value) => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => TempCamera(cameras: value))));
                     },
                     child: Text('Take Photo'),
                     style: ElevatedButton.styleFrom(
