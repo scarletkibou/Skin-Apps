@@ -69,7 +69,7 @@ class _PreviewPageState extends State<PreviewPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DiseasePage(Disease_name: _resultName),
+          builder: (context) => DiseasePage(diseaseName: _resultName),
         ),
       );
     }
@@ -101,11 +101,11 @@ class _PreviewPageState extends State<PreviewPage> {
                         onPressed: () {
                           continueToNextPage();
                         },
-                        child: Text('Continue to $_predictionResult'),
+                        child: Text('Continue to $_resultName'),
                       )
                     : Text(
                         'Prediction: $_predictionResult',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       )
                 : Container(),
           ],

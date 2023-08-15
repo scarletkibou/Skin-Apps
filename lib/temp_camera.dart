@@ -146,7 +146,7 @@ class _TempCameraState extends State<TempCamera> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                 ],
               ),
             ),

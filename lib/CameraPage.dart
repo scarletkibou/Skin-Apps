@@ -20,7 +20,7 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
   File? _pickedImage;
-
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   String _predictionResult = "";
   String _ResultName = "";
   bool _isPredicting = false;
@@ -48,7 +48,6 @@ class _CameraPageState extends State<CameraPage> {
   Future uploadFile(File imageFile) async {
     var name = uuid.v4();
     final pathSaved = 'Saved_Photo/$name';
-    final storageRef = FirebaseStorage.instance.ref();
     final file = File(imageFile.path);
     final ref = FirebaseStorage.instance.ref().child(pathSaved);
     ref.putFile(file);
@@ -182,7 +181,7 @@ class _CameraPageState extends State<CameraPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => DiseasePage(
-                                  Disease_name: _ResultName,
+                                  diseaseName: _ResultName,
                                 )),
                       );
                     },

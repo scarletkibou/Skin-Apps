@@ -1,41 +1,135 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class DiseasePage extends StatelessWidget {
-  final String Disease_name;
-  DiseasePage({required this.Disease_name});
+  final String diseaseName;
+  DiseasePage({
+    required this.diseaseName,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Disease_name),
+        title: Text(diseaseName),
       ),
-      body: ListView(
+      body: Stack(
         children: [
-          _buildDiseaseTile(
-            cause:
-                'เชื้อโรคอีสุกอีใสเกิดจากไวรัสที่แพร่เชื้อไปยังบุคคลอื่น ๆ ผ่านการสัมผัสกับผื่นโดยตรง นอกจากนั้นหากผู้ป่วยไอ หรือจามอาจจะทำการ	กระจายละอองเชื้ออีสุกอีใสไปในอากาศและทำการแพร่เชื้อแก่คนอื่นที่หายใจละอองที่มีเชื้อ เข้าไปในร่างกาย',
-            treatment:
-                '1.หลีกเลี่ยงการเกาแผลเนื่องจากช้าเพิ่มโอกาสการติดเชื้อ 2.ผู้ป่วยควรทำการนัดพบแพทย์เมื่อไข้กินระยะเวลานานเกิน 4 วัน 	และมีไข้ที่สูงกว่า 38.9 เซลเซียส 3.หลีกเลี่ยงการให้ยาแอสไพรินแก่เด็กหรือวัยรุ่นที่มีโรคอีสุกอีใสเนื่องจากอาจเกิดภาวะโรคเรย์ซินโด	รม 4.ควรทำการปรึกษาแพทย์ก่อนทำการให้ยาแก้ปวดลด อาการอักเสบกลุ่ม NSAID แก่ผู้ป่วยโรคอีสุกอีใส มีการวิจัยเผยว่ายากลุ่มนี้	อาจส่งผลให้เกิดการติดเชื้อ   ที่ผิวหนังหรือเนื้อเยื่อถูกทำลาย',
-            medicine: 'อะไซโคลเวียร์ (acyclovir)',
+          _buildPictureCarousel(),
+          Align(
+            alignment: Alignment.center,
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('SkinDisease')
+                  .where('disease_name', isEqualTo: diseaseName)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                var documents = snapshot.data!.docs;
+                if (documents.isEmpty) {
+                  return Center(
+                    child: Text('No data found for this disease.'),
+                  );
+                }
+
+                var data = documents[0].data() as Map<String, dynamic>;
+
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildDiseaseTopic(
+                        title: 'Cause',
+                        content: data['cause'],
+                      ),
+                      _buildDiseaseTopic(
+                        title: 'Curement',
+                        content: data['curement'],
+                      ),
+                      _buildDiseaseTopic(
+                        title: 'Symptom',
+                        content: data['symptom'],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDiseaseTile({
-    required String cause,
-    required String treatment,
-    required String medicine,
+  Widget _buildPictureCarousel() {
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 150,
+        viewportFraction: 2.0,
+        autoPlay: true,
+      ),
+      items: [
+        _buildPicture(
+          'https://firebasestorage.googleapis.com/v0/b/skin-apps.appspot.com/o/Searchbox_picture%2FEczema.jpg?alt=media&token=fdbbbb51-0b4e-4341-afbb-902fbb06fd1f',
+        ),
+        _buildPicture(
+          'https://firebasestorage.googleapis.com/v0/b/skin-apps.appspot.com/o/Searchbox_picture%2FEczema.jpg?alt=media&token=fdbbbb51-0b4e-4341-afbb-902fbb06fd1f',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPicture(String imageUrl) {
+    return Container(
+      width: double.infinity, // Take up the full width of the carousel
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+      ),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget _buildDiseaseTopic({
+    required String title,
+    required String content,
   }) {
-    return ListTile(
-      title: Text('Cause: $cause'),
-      subtitle: Column(
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 150, vertical: 5),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Treatment: $treatment'),
-          Text('Medicine: $medicine'),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Color(0xFF398378),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(content),
+          ),
         ],
       ),
     );
