@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'MedicineDetailsPage.dart';
+
 class DiseasePage extends StatelessWidget {
   final String diseaseName;
   DiseasePage({
@@ -15,11 +17,10 @@ class DiseasePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(diseaseName),
       ),
-      body: Stack(
+      body: Column(
         children: [
           _buildPictureCarousel(),
-          Align(
-            alignment: Alignment.center,
+          Expanded(
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('SkinDisease')
@@ -40,21 +41,48 @@ class DiseasePage extends StatelessWidget {
                 }
 
                 var data = documents[0].data() as Map<String, dynamic>;
+                List<String> medicineReferences =
+                    List<String>.from(data['medicine_references']);
 
                 return SingleChildScrollView(
                   child: Column(
                     children: [
                       _buildDiseaseTopic(
+                        context: context,
                         title: 'Cause',
                         content: data['cause'],
                       ),
                       _buildDiseaseTopic(
+                        context: context,
                         title: 'Curement',
                         content: data['curement'],
                       ),
                       _buildDiseaseTopic(
+                        context: context,
                         title: 'Symptom',
                         content: data['symptom'],
+                      ),
+                      FutureBuilder<List<String>>(
+                        // Fetch medicine data based on references
+                        future: _fetchMedicineData(medicineReferences),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error loading medicine data.');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return Text(' ');
+                          } else {
+                            List<String> medicineData = snapshot.data!;
+                            return _buildDiseaseTopic(
+                              context: context,
+                              title: 'Medicine References',
+                              content: medicineData.join('\n'),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -87,7 +115,7 @@ class DiseasePage extends StatelessWidget {
 
   Widget _buildPicture(String imageUrl) {
     return Container(
-      width: double.infinity, // Take up the full width of the carousel
+      width: double.infinity,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
       ),
@@ -98,12 +126,38 @@ class DiseasePage extends StatelessWidget {
     );
   }
 
+  Future<List<String>> _fetchMedicineData(
+      List<String> medicineReferences) async {
+    List<String> medicineData = [];
+
+    for (String reference in medicineReferences) {
+      DocumentSnapshot medicineSnapshot = await FirebaseFirestore.instance
+          .collection('Medicine')
+          .doc(reference)
+          .get();
+
+      if (medicineSnapshot.exists) {
+        var medicineDataMap = medicineSnapshot.data() as Map<String, dynamic>;
+        String medicineName = medicineDataMap['name'];
+        medicineData.add(medicineName);
+      }
+    }
+
+    return medicineData;
+  }
+
   Widget _buildDiseaseTopic({
     required String title,
     required String content,
+    required BuildContext context,
   }) {
+    if (title == 'Medicine References' && content.isEmpty) {
+      return Container();
+    }
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 150, vertical: 5),
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -113,11 +167,15 @@ class DiseasePage extends StatelessWidget {
               color: Color(0xFF398378),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -128,7 +186,34 @@ class DiseasePage extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(content),
+            child: title == 'Medicine References'
+                ? Wrap(
+                    direction: Axis.horizontal,
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: content
+                        .split('\n')
+                        .map(
+                          (item) => ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MedicineDetailsPage(
+                                    medicineReference: item,
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF398378),
+                            ),
+                            child: Text(item),
+                          ),
+                        )
+                        .toList(),
+                  )
+                : Text(content),
           ),
         ],
       ),

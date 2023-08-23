@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 import 'CameraPage.dart';
+import 'MedicineStorage.dart';
 import 'dataPage.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
@@ -22,12 +23,7 @@ class _HomePageState extends State<HomePage> {
     return [
       dataPage(),
       CameraPage(),
-      Container(
-        color: Colors.white,
-        child: Center(
-          child: Text('Settings Page'),
-        ),
-      ),
+      MedicineStorage(),
     ];
   }
 
@@ -51,8 +47,8 @@ class _HomePageState extends State<HomePage> {
         activeColorPrimary: Color.fromARGB(255, 17, 155, 134),
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.settings),
-        title: ("setting"),
+        icon: Icon(Icons.local_hospital),
+        title: ("Medicine"),
         activeColorPrimary: Color.fromARGB(255, 17, 155, 134),
         inactiveColorPrimary: Colors.black,
       ),

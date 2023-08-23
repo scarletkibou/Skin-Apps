@@ -204,7 +204,7 @@ class _CameraPageState extends State<CameraPage> {
                     child: Text('Pick Image'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF398378),
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: EdgeInsets.symmetric(vertical: 30),
                     ),
                   ),
                 ),
@@ -220,7 +220,7 @@ class _CameraPageState extends State<CameraPage> {
                     child: Text('Take Photo'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF398378),
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: EdgeInsets.symmetric(vertical: 30),
                     ),
                   ),
                 ),

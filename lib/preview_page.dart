@@ -23,7 +23,8 @@ class PreviewPage extends StatefulWidget {
 
 class _PreviewPageState extends State<PreviewPage> {
   bool _isPredicting = false;
-  String _predictionResult = "";
+  String _predictionName = "";
+  double _confidence = 0.0;
   String _resultName = "";
   bool _showContinueButton = false;
 
@@ -49,16 +50,14 @@ class _PreviewPageState extends State<PreviewPage> {
         await makePrediction(File(widget.picture.path));
 
     setState(() {
-      _predictionResult = "${prediction['class']},${prediction['confidence']}";
+      _predictionName = prediction['class'];
+      _confidence = prediction['confidence'];
       _isPredicting = false;
     });
 
-    List<String> predictionList = _predictionResult.split(',');
-    String predictionValue = predictionList[0].trim();
-
-    if (predictionValue.isNotEmpty) {
+    if (_predictionName.isNotEmpty) {
       setState(() {
-        _resultName = predictionValue;
+        _resultName = _predictionName;
         _showContinueButton = true;
       });
     }
@@ -84,30 +83,68 @@ class _PreviewPageState extends State<PreviewPage> {
           children: [
             Image.file(File(widget.picture.path),
                 fit: BoxFit.cover, width: 150),
-            const SizedBox(height: 200),
-            const SizedBox(height: 10),
+            const SizedBox(
+                height: 20), // Add spacing between image and prediction result
+            _predictionName.isNotEmpty
+                ? RichText(
+                    text: TextSpan(
+                      style: TextStyle(fontSize: 25, color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: 'Prediction: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        TextSpan(
+                          text: _predictionName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '\nConfidence: ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '$_confidence%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                : Container(),
+            _showContinueButton
+                ? ElevatedButton(
+                    onPressed: () {
+                      continueToNextPage();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF398378),
+                    ),
+                    child: Text('See $_resultName Details'),
+                  )
+                : Container(),
             _isPredicting
                 ? CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () {
                       predictImage();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF398378),
+                    ),
                     child: Text('Predict'),
                   ),
-            const SizedBox(height: 20),
-            _predictionResult.isNotEmpty
-                ? _showContinueButton
-                    ? ElevatedButton(
-                        onPressed: () {
-                          continueToNextPage();
-                        },
-                        child: Text('Continue to $_resultName'),
-                      )
-                    : Text(
-                        'Prediction: $_predictionResult',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      )
-                : Container(),
           ],
         ),
       ),
