@@ -10,6 +10,8 @@ class MedicineDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Color(0xFF398378),
         title: Text(medicineReference),
       ),
       body: FutureBuilder<DocumentSnapshot>(

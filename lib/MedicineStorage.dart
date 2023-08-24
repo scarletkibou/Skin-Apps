@@ -24,6 +24,8 @@ class _MedicineStoragePageState extends State<MedicineStorage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Color(0xFF398378),
         title: Text('Medicine List'),
       ),
       body: Column(

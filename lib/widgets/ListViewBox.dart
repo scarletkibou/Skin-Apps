@@ -15,7 +15,6 @@ class ListViewBox extends StatelessWidget {
     'https://firebasestorage.googleapis.com/v0/b/skin-apps.appspot.com/o/Searchbox_picture%2FEczema.jpg?alt=media&token=fdbbbb51-0b4e-4341-afbb-902fbb06fd1f',
     'https://firebasestorage.googleapis.com/v0/b/skin-apps.appspot.com/o/Searchbox_picture%2FEczema.jpg?alt=media&token=fdbbbb51-0b4e-4341-afbb-902fbb06fd1f',
   ];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,43 +23,46 @@ class ListViewBox extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: imageUrls.length,
         itemBuilder: (context, index) {
-          return Stack(
-            alignment: Alignment.bottomRight,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(6.0),
-                child: Container(
-                  width: 224,
-                  height: 224,
-                  child: Image.network(
-                    imageUrls[index],
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Container(
-                width: 60,
-                height: 60,
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(),
-                  color: Colors.transparent,
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: DecoratedBox(
-                    child: Center(
-                      child: Icon(Icons.east_rounded, color: Colors.white),
+          return Container(
+            width: 200,
+            margin: EdgeInsets.symmetric(horizontal: 6),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 200,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(imageUrls[index]),
+                      fit: BoxFit.cover,
                     ),
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF398378),
                       ),
-                      color: Color(0xFF398378),
+                      child: Center(
+                        child: Icon(Icons.east_rounded, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
-              )
-            ],
+                SizedBox(height: 6),
+                Text(
+                  'Your Text Here',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

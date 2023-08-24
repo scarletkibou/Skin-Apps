@@ -77,7 +77,8 @@ class _HomePageState extends State<HomePage> {
               screens: _buildScreens(),
               items: _navBarsItems(),
               confineInSafeArea: true,
-              backgroundColor: Colors.grey.shade100, // Default is Colors.white.
+              backgroundColor: Color.fromARGB(
+                  255, 233, 237, 237), // Default is Colors.white.
               handleAndroidBackButtonPress: true, // Default is true.
               resizeToAvoidBottomInset:
                   true, // This needs to be true if you want to move up the screen when keyboard appears. Default is true.

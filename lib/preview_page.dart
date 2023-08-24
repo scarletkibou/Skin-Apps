@@ -77,6 +77,11 @@ class _PreviewPageState extends State<PreviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Color(0xFF398378),
+        title: Text('Detect Page'),
+      ),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
